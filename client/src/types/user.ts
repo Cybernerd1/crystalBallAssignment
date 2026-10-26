@@ -1,4 +1,4 @@
-export type UserRole = 'admin' | 'member' | 'editor';
+export type UserRole = 'admin' | 'editor' | 'viewer';
 export type UserStatus = 'active' | 'inactive';
 
 export interface User {
@@ -28,10 +28,10 @@ export interface Pagination {
   totalPages: number;
 }
 
-/** GET /api/users/stats response payload. */
+/** GET /api/users/stats response payload (exact PRD shape). */
 export interface UserStats {
   total: number;
   active: number;
-  newThisWeek: number;
-  generatedAt: string;
+  inactive: number;
+  last7Days: number;
 }

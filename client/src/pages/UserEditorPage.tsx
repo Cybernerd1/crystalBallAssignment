@@ -1,7 +1,7 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 
-import Icon from '../components/ui/Icon';
+import Button from '../components/ui/Button';
 import ErrorBanner from '../components/ui/ErrorBanner';
 import Spinner from '../components/ui/Spinner';
 import UserFormFields, {
@@ -13,10 +13,13 @@ import { useToast } from '../context/ToastContext';
 import { usersApi } from '../services/usersApi';
 import type { UserInput } from '../types/user';
 
+type TouchedMap = Partial<Record<keyof FormValues, boolean>>;
+
 /**
  * Dedicated full page for creating a user (`/users/new`) or editing one
- * (`/users/:id/edit`). Failed saves keep the page open and show the server's
- * field errors — the UI never pretends a failed request succeeded.
+ * (`/users/:id/edit`). Field errors appear on blur (PRD §4.3) and block the
+ * submit; failed saves keep the page open and show the server's field errors —
+ * the UI never pretends a failed request succeeded.
  */
 export default function UserEditorPage() {
   const { id } = useParams();
@@ -27,6 +30,7 @@ export default function UserEditorPage() {
   const [userId, setUserId] = useState<string | null>(id ?? null);
   const [values, setValues] = useState<FormValues>(() => initialValues(null));
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [touched, setTouched] = useState<TouchedMap>({});
   const [formError, setFormError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [initialLoading, setInitialLoading] = useState(isEdit);
@@ -60,13 +64,32 @@ export default function UserEditorPage() {
 
   const setField = <K extends keyof FormValues>(key: K, value: FormValues[K]) => {
     setValues((previous) => ({ ...previous, [key]: value }));
+    setFormError(null);
+    // Re-validate live once the field has been visited, so a bad value fixed
+    // in-place clears its error without another blur.
     setErrors((previous) => {
       if (!previous[key]) return previous;
       const next = { ...previous };
-      delete next[key];
+      delete next[key as string];
       return next;
     });
-    setFormError(null);
+  };
+
+  // PRD: validation runs on blur, not only on submit.
+  const handleBlur = (key: keyof FormValues) => {
+    setTouched((previous) => ({ ...previous, [key]: true }));
+
+    const fieldResult = validate(values);
+    if (fieldResult[key]) {
+      setErrors((previous) => ({ ...previous, [key]: fieldResult[key] }));
+    } else {
+      setErrors((previous) => {
+        if (!previous[key]) return previous;
+        const next = { ...previous };
+        delete next[key as string];
+        return next;
+      });
+    }
   };
 
   async function handleSubmit(event: FormEvent) {
@@ -75,6 +98,11 @@ export default function UserEditorPage() {
 
     const clientErrors = validate(values);
     if (Object.keys(clientErrors).length > 0) {
+      const allTouched: TouchedMap = {};
+      for (const key of Object.keys(clientErrors) as Array<keyof FormValues>) {
+        allTouched[key] = true;
+      }
+      setTouched((previous) => ({ ...previous, ...allTouched }));
       setErrors(clientErrors);
       return;
     }
@@ -100,6 +128,11 @@ export default function UserEditorPage() {
     } catch (err) {
       const failure = err as { fields?: Record<string, string>; message?: string };
       if (failure.fields && Object.keys(failure.fields).length > 0) {
+        const serverTouched: TouchedMap = {};
+        for (const key of Object.keys(failure.fields) as Array<keyof FormValues>) {
+          serverTouched[key] = true;
+        }
+        setTouched((previous) => ({ ...previous, ...serverTouched }));
         setErrors(failure.fields);
         setFormError('Please fix the errors below.');
       } else {
@@ -125,7 +158,6 @@ export default function UserEditorPage() {
       <div className="page page--form">
         <ErrorBanner message={initialError} />
         <Link to="/users" className="btn btn--secondary">
-          <Icon name="chevron-left" size={16} />
           Back to Users
         </Link>
       </div>
@@ -137,7 +169,6 @@ export default function UserEditorPage() {
       <header className="page__header">
         <div>
           <Link to="/users" className="page__back-link">
-            <Icon name="chevron-left" size={15} />
             Users
           </Link>
           <h1 className="page__title">{isEdit ? 'Edit user' : 'Create user'}</h1>
@@ -150,16 +181,22 @@ export default function UserEditorPage() {
       <form id="user-editor" className="card user-form-card" onSubmit={handleSubmit} noValidate>
         {formError ? <p className="form-banner">{formError}</p> : null}
 
-        <UserFormFields values={values} errors={errors} onChange={setField} />
+        <UserFormFields
+          values={values}
+          errors={errors}
+          touched={touched}
+          onChange={setField}
+          onBlur={handleBlur}
+        />
 
         <footer className="user-form-card__footer">
-          <button type="button" className="btn btn--secondary" onClick={() => navigate('/users')} disabled={saving}>
+          <Button variant="secondary" disabled={saving} onClick={() => navigate('/users')}>
             Cancel
-          </button>
-          <button type="submit" className="btn btn--primary" disabled={saving}>
+          </Button>
+          <Button type="submit" disabled={saving}>
             {saving ? <Spinner size={14} label="Saving" /> : null}
             {isEdit ? 'Save changes' : 'Create user'}
-          </button>
+          </Button>
         </footer>
       </form>
     </div>

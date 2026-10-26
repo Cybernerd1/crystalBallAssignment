@@ -7,6 +7,8 @@ import UsersTable from '../components/users/UsersTable';
 import EmptyState from '../components/ui/EmptyState';
 import ErrorBanner from '../components/ui/ErrorBanner';
 import Icon from '../components/ui/Icon';
+import Input from '../components/ui/Input';
+import Select from '../components/ui/Select';
 import { useUsers } from '../hooks/useUsers';
 import { usersApi } from '../services/usersApi';
 import { useToast } from '../context/ToastContext';
@@ -27,7 +29,7 @@ function toIntOr(value: string | null, fallback: number): number {
 }
 
 function isRole(value: string): value is UserRole {
-  return value === 'admin' || value === 'member' || value === 'editor';
+  return value === 'admin' || value === 'editor' || value === 'viewer';
 }
 
 function isStatus(value: string): value is UserStatus {
@@ -134,9 +136,8 @@ export default function UsersPage() {
         <div className="users-toolbar">
           <div className="users-toolbar__search">
             <Icon name="search" size={16} />
-            <input
+            <Input
               type="search"
-              className="input"
               placeholder="Search by name or email"
               aria-label="Search users by name or email"
               value={searchInput}
@@ -144,20 +145,18 @@ export default function UsersPage() {
             />
           </div>
 
-          <select
-            className="input select"
+          <Select
             aria-label="Filter by role"
             value={searchParams.get('role') ?? ''}
             onChange={(event) => updateParams({ role: event.target.value || null }, { resetPage: true })}
           >
             <option value="">All roles</option>
             <option value="admin">Admin</option>
-            <option value="member">Member</option>
             <option value="editor">Editor</option>
-          </select>
+            <option value="viewer">Viewer</option>
+          </Select>
 
-          <select
-            className="input select"
+          <Select
             aria-label="Filter by status"
             value={searchParams.get('status') ?? ''}
             onChange={(event) => updateParams({ status: event.target.value || null }, { resetPage: true })}
@@ -165,10 +164,9 @@ export default function UsersPage() {
             <option value="">All statuses</option>
             <option value="active">Active</option>
             <option value="inactive">Inactive</option>
-          </select>
+          </Select>
 
-          <select
-            className="input select"
+          <Select
             aria-label="Sort users"
             value={searchParams.get('sort') ?? '-createdAt'}
             onChange={(event) => updateParams({ sort: event.target.value || null }, { resetPage: true })}
@@ -176,10 +174,9 @@ export default function UsersPage() {
             <option value="-createdAt">Newest first</option>
             <option value="name">Name A–Z</option>
             <option value="-name">Name Z–A</option>
-          </select>
+          </Select>
 
-          <select
-            className="input select"
+          <Select
             aria-label="Rows per page"
             value={String(limit)}
             onChange={(event) => updateParams({ limit: event.target.value }, { resetPage: true })}
@@ -189,7 +186,7 @@ export default function UsersPage() {
                 {option} / page
               </option>
             ))}
-          </select>
+          </Select>
 
           {hasFilters ? (
             <button

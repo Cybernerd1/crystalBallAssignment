@@ -27,45 +27,45 @@ export const usersApi = {
     if (params.sort && params.sort !== '-createdAt') query.set('sort', params.sort);
 
     const suffix = query.toString() ? `?${query.toString()}` : '';
-    const envelope = await httpClient<{ success: boolean; data: User[]; pagination: Pagination }>(`/users${suffix}`);
-    return { data: envelope.data, pagination: envelope.pagination };
+    const body = await httpClient<{ data: User[]; pagination: Pagination }>(`/users${suffix}`);
+    return { data: body.data, pagination: body.pagination };
   },
 
   /** GET /api/users/:id */
   async get(id: string): Promise<User> {
-    const envelope = await httpClient<{ success: boolean; data: User }>(`/users/${id}`);
-    return envelope.data;
+    const body = await httpClient<{ data: User }>(`/users/${id}`);
+    return body.data;
   },
 
   /** POST /api/users */
   async create(input: UserInput): Promise<User> {
-    const envelope = await httpClient<{ success: boolean; data: User }>('/users', {
+    const body = await httpClient<{ data: User }>('/users', {
       method: 'POST',
       body: JSON.stringify(input),
     });
-    return envelope.data;
+    return body.data;
   },
 
   /** PUT /api/users/:id */
   async update(id: string, input: UserInput): Promise<User> {
-    const envelope = await httpClient<{ success: boolean; data: User }>(`/users/${id}`, {
+    const body = await httpClient<{ data: User }>(`/users/${id}`, {
       method: 'PUT',
       body: JSON.stringify(input),
     });
-    return envelope.data;
+    return body.data;
   },
 
-  /** DELETE /api/users/:id */
-  async remove(id: string): Promise<User> {
-    const envelope = await httpClient<{ success: boolean; data: User }>(`/users/${id}`, {
+  /** DELETE /api/users/:id — server answers `{ data: { id } }` per the PRD. */
+  async remove(id: string): Promise<{ id: string }> {
+    const body = await httpClient<{ data: { id: string } }>(`/users/${id}`, {
       method: 'DELETE',
     });
-    return envelope.data;
+    return body.data;
   },
 
   /** GET /api/users/stats */
   async stats(): Promise<UserStats> {
-    const envelope = await httpClient<{ success: boolean; data: UserStats }>('/users/stats');
-    return envelope.data;
+    const body = await httpClient<{ data: UserStats }>('/users/stats');
+    return body.data;
   },
 };

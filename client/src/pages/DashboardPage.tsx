@@ -88,7 +88,7 @@ export default function DashboardPage() {
         <StatCard
           icon="plus-circle"
           label="New this week"
-          value={stats ? formatCount(stats.newThisWeek) : ''}
+          value={stats ? formatCount(stats.last7Days) : ''}
           meta="Created in the last 7 days"
           loading={statsLoading}
         />
@@ -148,7 +148,7 @@ export default function DashboardPage() {
         <section className="card dashboard-card dashboard-card--theme" aria-label="Theme customizer">
           <header className="card__header">
             <h2 className="card__title">Theme customizer</h2>
-            <span className={`card__chip card__chip--${state.preset}`}>{state.preset}</span>
+            <span className={`card__chip card__chip--${state.presetId}`}>{state.presetId}</span>
           </header>
           <ThemeCustomizer />
         </section>

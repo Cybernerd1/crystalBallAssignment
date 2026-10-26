@@ -42,20 +42,20 @@ Checkboxes are updated as each step is executed.
 
 ## Frontend plan
 
-- [ ] F1 — `themes/color.ts`: rgb-based mixing + WCAG relative-luminance helpers
-- [ ] F2 — `themes/resolveTheme.ts`: pure `(state) => Record<string, string>` with button text contrast
-- [ ] F3 — `themes/themeStorage.ts`: only file touching localStorage; key `app.theme.v1`; safe parse
-- [ ] F4 — `themes/fontLoader.ts`: load from ArrayBuffer, remove previous face, typed `FontLoadError`, MIME+extension+size checks, rehydrate from data URL
-- [ ] F5 — `themes/presets.ts`: Blue / Violet / Darcula / Forest with PRD values (+ muted, border, danger, colorScheme, sidebar, shadows)
-- [ ] F6 — `ThemeState = { presetId, buttonColor, font }`; ThemeContext applies `resolveTheme` output; default preset `blue`
-- [ ] F7 — override affects only `--btn-bg` / `--btn-text` / `--btn-bg-hover`; preset switch never clears override or font
-- [ ] F8 — theme components updated (PresetPicker, button-color picker incl. yellow, FontUploader with `font.fileName`); reset returns to defaults
-- [ ] F9 — inline pre-paint script in `index.html` (colors before React mounts; documented mirror of presets)
-- [ ] F10 — `tokens.css` fallback palette converted off raw hex; `font: inherit` guard verified on form controls
-- [ ] F11 — user API/types updated to PRD contract (`last7Days`, `viewer`, `{ data:{ id } }` delete); dashboard cards updated
-- [ ] F12 — `ui/Button`, `ui/Input`, `ui/Select` primitives and adoption across forms, toolbar, dialogs, headers
-- [ ] F13 — validation on blur (touched fields) + submit; delete dialog focuses Cancel
-- [ ] F14 — grep check: no leftover hex outside `presets.ts`/inline mirror; build clean
+- [x] F1 — `themes/color.ts`: rgb-based mixing + WCAG relative-luminance helpers
+- [x] F2 — `themes/resolveTheme.ts`: pure `(state) => Record<string, string>` with button text contrast
+- [x] F3 — `themes/themeStorage.ts`: only file touching localStorage; key `app.theme.v1`; safe parse
+- [x] F4 — `themes/fontLoader.ts`: load from ArrayBuffer, remove previous face, typed `FontLoadError`, MIME+extension+size checks, rehydrate from data URL
+- [x] F5 — `themes/presets.ts`: Blue / Violet / Darcula / Forest with PRD values (+ muted, border, danger, colorScheme, sidebar, shadows)
+- [x] F6 — `ThemeState = { presetId, buttonColor, font }`; ThemeContext applies `resolveTheme` output; default preset `blue`
+- [x] F7 — override affects only `--btn-bg` / `--btn-text` / `--btn-bg-hover`; preset switch never clears override or font
+- [x] F8 — theme components updated (PresetPicker, button-color picker incl. yellow, FontUploader with `font.fileName`); reset returns to defaults
+- [x] F9 — inline pre-paint script in `index.html` (colors before React mounts; documented mirror of presets)
+- [x] F10 — `tokens.css` fallback palette converted off raw hex; `font: inherit` guard verified on form controls
+- [x] F11 — user API/types updated to PRD contract (`last7Days`, `viewer`, `{ data:{ id } }` delete); dashboard cards updated
+- [x] F12 — `ui/Button`, `ui/Input`, `ui/Select` primitives and adoption across forms, toolbar, dialogs, headers
+- [x] F13 — validation on blur (touched fields) + submit; delete dialog focuses Cancel
+- [x] F14 — grep check: no leftover hex outside `presets.ts`/inline mirror; build clean
 
 ## Docs & submission
 

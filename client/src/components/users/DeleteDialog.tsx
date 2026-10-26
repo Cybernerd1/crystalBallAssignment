@@ -1,6 +1,7 @@
 import { useState } from 'react';
 
 import Modal from '../ui/Modal';
+import Button from '../ui/Button';
 import Spinner from '../ui/Spinner';
 import type { User } from '../../types/user';
 
@@ -44,13 +45,15 @@ export default function DeleteDialog({ open, user, onClose, onConfirm }: DeleteD
       width={420}
       footer={
         <>
-          <button type="button" className="btn btn--secondary" onClick={onClose} disabled={working}>
+          {/* PRD: with confirmation dialogs focus lands on the safe action.
+              autoFocus on Cancel prevents Enter from deleting instantly. */}
+          <Button variant="secondary" autoFocus onClick={onClose} disabled={working}>
             Cancel
-          </button>
-          <button type="button" className="btn btn--danger" onClick={handleConfirm} disabled={working}>
+          </Button>
+          <Button variant="danger" onClick={handleConfirm} disabled={working}>
             {working ? <Spinner size={14} label="Deleting" /> : null}
             {working ? 'Deleting…' : 'Delete user'}
-          </button>
+          </Button>
         </>
       }
     >

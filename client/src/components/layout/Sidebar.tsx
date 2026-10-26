@@ -1,7 +1,7 @@
 import { NavLink } from 'react-router-dom';
 
 import { useTheme } from '../../hooks/useTheme';
-import { PRESETS } from '../../theme/presets';
+import { PRESETS } from '../../themes/presets';
 import Icon, { type IconName } from '../ui/Icon';
 
 interface SidebarProps {
@@ -15,7 +15,7 @@ const NAV_ITEMS: Array<{ to: string; label: string; icon: IconName; end?: boolea
 ];
 
 export default function Sidebar({ open, onOpenTheme }: SidebarProps) {
-  const { state, accent } = useTheme();
+  const { state, buttonColor } = useTheme();
 
   return (
     <aside className={`sidebar ${open ? 'sidebar--open' : ''}`}>
@@ -45,8 +45,8 @@ export default function Sidebar({ open, onOpenTheme }: SidebarProps) {
       <div className="sidebar__footer">
         <p className="sidebar__hint">Personalize colors &amp; typography</p>
         <button type="button" className="theme-chip" onClick={onOpenTheme}>
-          <span className="theme-chip__dot" style={{ background: accent }} />
-          {PRESETS[state.preset].label} theme
+          <span className="theme-chip__dot" style={{ background: buttonColor }} />
+          {PRESETS[state.presetId].label} theme
         </button>
       </div>
     </aside>

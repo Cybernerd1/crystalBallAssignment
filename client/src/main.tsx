@@ -2,24 +2,12 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 
 import App from './App';
-import { applyTheme } from './theme/applyTheme';
-import { loadThemeState } from './theme/persistence';
-import { registerCustomFont } from './theme/font';
 import './styles/tokens.css';
 import './styles/global.css';
 
-// Restore any saved theme before the first paint so there is no flash of the
-// default palette. Font registration is best-effort; ThemeContext handles
-// failure notices while the default stack stays in charge of rendering.
-const savedTheme = loadThemeState();
-if (savedTheme) {
-  if (savedTheme.customFontDataUrl) {
-    registerCustomFont(savedTheme.customFontDataUrl).catch(() => {
-      // Handled again (with a visible notice) inside ThemeContext.
-    });
-  }
-  applyTheme(savedTheme);
-}
+// Color-first-paint is handled by the inline script in index.html (reads the
+// same app.theme.v1 key). The custom font rehydrates asynchronously inside
+// ThemeContext — the system stack renders until the face resolves by design.
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

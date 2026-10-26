@@ -1,16 +1,24 @@
-export type ThemePreset = 'light' | 'blue' | 'violet' | 'dark';
+export type ThemePreset = 'blue' | 'violet' | 'darcula' | 'forest';
 
 /**
- * Single source of truth for the visual theme:
- * - `preset` supplies the base palette (colors, surfaces, shadows).
- * - `accentOverride` recolors interactive elements independently of the preset.
- * - `customFont*` overrides typeface across the whole app.
+ * Stored custom font: file name for display, data URL for persistence.
+ * Shape mandated by the PRD: `font: { fileName, dataUrl } | null`.
+ */
+export interface ThemeFont {
+  fileName: string;
+  dataUrl: string;
+}
+
+/**
+ * Single source of truth for the visual theme — three independent layers:
+ * - `presetId` supplies the base palette (colors, surfaces, shadows).
+ * - `buttonColor` (nullable) recolors primary buttons only (`--btn-bg`/`--btn-text`).
+ * - `font` (nullable) overrides the typeface across the whole app.
  */
 export interface ThemeState {
-  preset: ThemePreset;
-  accentOverride: string | null;
-  customFontDataUrl: string | null;
-  customFontName: string | null;
+  presetId: ThemePreset;
+  buttonColor: string | null;
+  font: ThemeFont | null;
 }
 
 export type ThemeNotice = { type: 'error' | 'warning' | 'success'; message: string } | null;

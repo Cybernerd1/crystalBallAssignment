@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 
 import { useTheme } from '../../hooks/useTheme';
-import { PRESETS } from '../../theme/presets';
+import { DEFAULT_PRESET, PRESETS } from '../../themes/presets';
 import AccentPicker from './AccentPicker';
 import FontUploader from './FontUploader';
 import PresetPicker from './PresetPicker';
@@ -11,11 +11,12 @@ interface ThemeCustomizerProps {
 }
 
 /**
- * The shared theme editor body: presets, accent override and custom font.
- * Rendered inside the ThemePanel drawer and as a dashboard card.
+ * The shared theme editor body: presets, button-color override and custom
+ * font. "Reset" returns to the Blue preset with no override and no font — the
+ * PRD's explicit reset semantics (a preset switch alone never does that).
  */
 export default function ThemeCustomizer({ onReset }: ThemeCustomizerProps) {
-  const { notice, dismissNotice, state, setPreset, setAccentOverride, clearCustomFont } = useTheme();
+  const { notice, dismissNotice, state, setPreset, setButtonColor, clearFont } = useTheme();
 
   useEffect(() => {
     if (!notice) return;
@@ -24,9 +25,9 @@ export default function ThemeCustomizer({ onReset }: ThemeCustomizerProps) {
   }, [notice, dismissNotice]);
 
   function resetAll() {
-    setPreset('light');
-    setAccentOverride(null);
-    clearCustomFont();
+    setPreset(DEFAULT_PRESET);
+    setButtonColor(null);
+    clearFont();
     onReset?.();
   }
 
@@ -44,7 +45,8 @@ export default function ThemeCustomizer({ onReset }: ThemeCustomizerProps) {
       </section>
 
       <section className="theme-customizer__section">
-        <h3 className="theme-customizer__heading">Accent color</h3>
+        <h3 className="theme-customizer__heading">Button color</h3>
+        <p className="theme-customizer__hint">Overrides the primary buttons only — links, badges and the sidebar keep the preset accent.</p>
         <AccentPicker />
       </section>
 
@@ -55,7 +57,7 @@ export default function ThemeCustomizer({ onReset }: ThemeCustomizerProps) {
 
       <footer className="theme-customizer__footer">
         <span className="muted">
-          Preset: {PRESETS[state.preset].label} · Preferences are saved in this browser.
+          Preset: {PRESETS[state.presetId].label} · Preferences are saved in this browser.
         </span>
         <button type="button" className="btn btn--ghost btn--sm" onClick={resetAll}>
           Reset all

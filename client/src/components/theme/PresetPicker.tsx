@@ -1,4 +1,4 @@
-import { PRESETS, PRESET_IDS } from '../../theme/presets';
+import { PRESETS, PRESET_IDS } from '../../themes/presets';
 import { useTheme } from '../../hooks/useTheme';
 
 /** Four coordinate presets shown as mini previews. */
@@ -9,7 +9,7 @@ export default function PresetPicker() {
     <div className="preset-grid" role="group" aria-label="Theme preset">
       {PRESET_IDS.map((id) => {
         const preset = PRESETS[id];
-        const isActive = state.preset === id;
+        const isActive = state.presetId === id;
         return (
           <button
             key={id}

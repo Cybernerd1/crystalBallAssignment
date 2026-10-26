@@ -7,28 +7,35 @@ import {
   type ReactNode,
 } from 'react';
 
-import { applyTheme } from '../theme/applyTheme';
-import { loadThemeState, persistThemeState } from '../theme/persistence';
-import { registerCustomFont, removeRegisteredCustomFont } from '../theme/font';
-import { effectiveAccent } from '../theme/presets';
+import {
+  FontLoadError,
+  dataUrlToArrayBuffer,
+  fontKey,
+  loadFont,
+  readFileAsArrayBuffer,
+  readFileAsDataUrl,
+  removeRegisteredFont,
+  validateFontFile,
+} from '../themes/fontLoader';
+import { resolveTheme } from '../themes/resolveTheme';
+import { PRESETS } from '../themes/presets';
+import { defaultThemeState, loadThemeState, saveThemeState } from '../themes/themeStorage';
 import type { ThemeNotice, ThemePreset, ThemeState } from '../types/theme';
 
-const DEFAULT_STATE: ThemeState = {
-  preset: 'light',
-  accentOverride: null,
-  customFontDataUrl: null,
-  customFontName: null,
-};
+const DEFAULT_STATE: ThemeState = defaultThemeState();
 
 export interface ThemeContextValue {
   state: ThemeState;
-  /** The accent actually in use: `accentOverride ?? preset.accent`. */
-  accent: string;
-  setPreset(preset: ThemePreset): void;
-  setAccentOverride(color: string | null): void;
-  /** Rejects if the font data cannot be loaded as a font. */
-  setCustomFont(dataUrl: string, fileName: string): Promise<void>;
-  clearCustomFont(): void;
+  /** Button color in force: `state.buttonColor ?? preset accent`. */
+  buttonColor: string;
+  setPreset(presetId: ThemePreset): void;
+  /** `null` restores the preset accent for buttons. */
+  setButtonColor(color: string | null): void;
+  /** Validates, live-loads and only then accepts a custom font. */
+  applyFontFile(file: File): Promise<void>;
+  clearFont(): void;
+  /** Set while applying a font file (disable the picker against double work). */
+  applyingFont: boolean;
   notice: ThemeNotice;
   dismissNotice(): void;
 }
@@ -36,39 +43,55 @@ export interface ThemeContextValue {
 export const ThemeContext = createContext<ThemeContextValue | null>(null);
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
+  // Storage restore happens here; the index.html inline script already painted
+  // the right colors before React mounted.
   const [state, setState] = useState<ThemeState>(() => loadThemeState() ?? DEFAULT_STATE);
   const [notice, setNotice] = useState<ThemeNotice>(null);
+  const [applyingFont, setApplyingFont] = useState(false);
 
-  // Keep the registered FontFace in sync with the stored custom font. This
-  // covers both startup rehydration and later uploads/removals.
-  const activeDataUrl = state.customFontDataUrl;
+  // Keep the registered FontFace in sync with the stored font. Covers both
+  // startup rehydration and later uploads/removals. The system font shows
+  // until the face resolves — we never block rendering on font data.
+  const storedFont = state.font;
   useEffect(() => {
     let cancelled = false;
-    if (!activeDataUrl) {
-      removeRegisteredCustomFont();
+    if (!storedFont) {
+      removeRegisteredFont();
       return;
     }
-    registerCustomFont(activeDataUrl).catch((err) => {
-      console.error('[theme] Custom font failed to load:', err);
+    loadFont(
+      dataUrlToArrayBuffer(storedFont.dataUrl),
+      fontKey(storedFont.fileName, storedFont.dataUrl.length),
+    ).catch((err) => {
       if (cancelled) return;
-      removeRegisteredCustomFont();
+      removeRegisteredFont();
       setNotice({
         type: 'error',
-        message: 'The custom font could not be loaded — falling back to the default font.',
+        message:
+          err instanceof FontLoadError
+            ? `The saved font failed to load (${err.kind}) — falling back to the system font.`
+            : 'The saved font failed to load — falling back to the system font.',
       });
       // Drop the broken font from the persisted state too.
-      setState((prev) => ({ ...prev, customFontDataUrl: null, customFontName: null }));
+      setState((prev) => ({ ...prev, font: null }));
     });
     return () => {
       cancelled = true;
     };
-  }, [activeDataUrl]);
+  }, [storedFont]);
 
-  // Central application + persistence. Runs on mount as well, which restores
-  // the saved look immediately after startup.
+  // Central application + persistence. Runs on mount as well, restoring the
+  // resolved tokens (already painted by the inline script) authoritatively.
   useEffect(() => {
-    applyTheme(state);
-    const result = persistThemeState(state);
+    const root = document.documentElement;
+    const tokens = resolveTheme(state);
+    for (const [name, value] of Object.entries(tokens)) {
+      root.style.setProperty(`--${name}`, value);
+    }
+    if (!state.font) root.style.removeProperty('--font-family');
+    root.setAttribute('data-theme', state.presetId);
+
+    const result = saveThemeState(state);
     if (!result.ok) {
       setNotice({
         type: 'warning',
@@ -80,25 +103,35 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     }
   }, [state]);
 
-  const setPreset = useCallback((preset: ThemePreset) => {
-    setState((prev) => ({ ...prev, preset }));
+  const setPreset = useCallback((presetId: ThemePreset) => {
+    // Switching presets never clears the button override or the font.
+    setState((prev) => ({ ...prev, presetId }));
   }, []);
 
-  const setAccentOverride = useCallback((color: string | null) => {
-    setState((prev) => ({ ...prev, accentOverride: color }));
+  const setButtonColor = useCallback((buttonColor: string | null) => {
+    setState((prev) => ({ ...prev, buttonColor }));
   }, []);
 
-  const setCustomFont = useCallback(async (dataUrl: string, fileName: string) => {
-    // Register first: if the data is not a usable font this throws and the
-    // state (and storage) are left untouched.
-    await registerCustomFont(dataUrl);
-    setNotice(null);
-    setState((prev) => ({ ...prev, customFontDataUrl: dataUrl, customFontName: fileName }));
+  const applyFontFile = useCallback(async (file: File) => {
+    setApplyingFont(true);
+    try {
+      // Type/size checks before reading anything (typed FontLoadError).
+      validateFontFile(file);
+      const [buffer, dataUrl] = await Promise.all([
+        readFileAsArrayBuffer(file),
+        readFileAsDataUrl(file),
+      ]);
+      // Load first: if the data is not a usable font this throws and both the
+      // state and storage are left untouched, keeping the previous font.
+      await loadFont(buffer, fontKey(file.name, buffer.byteLength));
+      setState((prev) => ({ ...prev, font: { fileName: file.name, dataUrl } }));
+    } finally {
+      setApplyingFont(false);
+    }
   }, []);
 
-  const clearCustomFont = useCallback(() => {
-    setNotice(null);
-    setState((prev) => ({ ...prev, customFontDataUrl: null, customFontName: null }));
+  const clearFont = useCallback(() => {
+    setState((prev) => ({ ...prev, font: null }));
   }, []);
 
   const dismissNotice = useCallback(() => setNotice(null), []);
@@ -106,15 +139,16 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   const value = useMemo<ThemeContextValue>(
     () => ({
       state,
-      accent: effectiveAccent(state),
+      buttonColor: state.buttonColor ?? PRESETS[state.presetId].tokens['color-accent'],
       setPreset,
-      setAccentOverride,
-      setCustomFont,
-      clearCustomFont,
+      setButtonColor,
+      applyFontFile,
+      clearFont,
+      applyingFont,
       notice,
       dismissNotice,
     }),
-    [state, notice, setPreset, setAccentOverride, setCustomFont, clearCustomFont, dismissNotice],
+    [state, setPreset, setButtonColor, applyFontFile, clearFont, applyingFont, notice, dismissNotice],
   );
 
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;

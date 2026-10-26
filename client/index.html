@@ -12,6 +12,97 @@
       href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400..700&display=swap"
       rel="stylesheet"
     />
+    <script>
+      /*
+       * First-paint theme restore. Reads the single `app.theme.v1` storage key
+       * and sets the CSS variables before React mounts, so a reload never
+       * flashes the wrong palette.
+       *
+       * MAINTENANCE NOTE: this is a *documented mirror* of the preset tokens in
+       * src/themes/presets.ts (the PRD's acceptance check allows hex codes only
+       * in presets.ts and here). If you change a preset, change its mirror too.
+       * The font is NOT applied here — it rehydrates into a FontFace a moment
+       * after React mounts (the system stack renders until then, by design).
+       */
+      (function () {
+        try {
+          var PRESETS = {
+            blue: {
+              'color-bg': '#F4F7FB', 'color-sidebar': '#EBF1F8', 'color-surface': '#FFFFFF',
+              'color-surface-alt': '#F7FAFD', 'color-text': '#0F1B2D', 'color-text-muted': '#5B6B7C',
+              'color-border': '#DCE5EF', 'color-accent': '#2563EB', 'color-accent-hover': '#1D4ED8',
+              'color-danger': '#E11D48', 'shadow-card': '0 1px 2px rgba(15,27,45,.06), 0 4px 14px rgba(15,27,45,.06)',
+              'shadow-overlay': '0 12px 40px rgba(15,27,45,.2)', 'color-scheme': 'light'
+            },
+            violet: {
+              'color-bg': '#F6F3FF', 'color-sidebar': '#EFEAFA', 'color-surface': '#FFFFFF',
+              'color-surface-alt': '#FAF8FE', 'color-text': '#1E1633', 'color-text-muted': '#655B7A',
+              'color-border': '#E4DFF3', 'color-accent': '#7C3AED', 'color-accent-hover': '#6B21D1',
+              'color-danger': '#E11D48', 'shadow-card': '0 1px 2px rgba(30,22,51,.06), 0 4px 14px rgba(30,22,51,.06)',
+              'shadow-overlay': '0 12px 40px rgba(30,22,51,.2)', 'color-scheme': 'light'
+            },
+            darcula: {
+              'color-bg': '#2B2B2B', 'color-sidebar': '#262626', 'color-surface': '#3C3F41',
+              'color-surface-alt': '#333638', 'color-text': '#A9B7C6', 'color-text-muted': '#7E8792',
+              'color-border': '#4E5054', 'color-accent': '#4B6EAF', 'color-accent-hover': '#5A7EBE',
+              'color-danger': '#FF6B68', 'shadow-card': '0 1px 2px rgba(0,0,0,.3), 0 4px 14px rgba(0,0,0,.25)',
+              'shadow-overlay': '0 12px 40px rgba(0,0,0,.5)', 'color-scheme': 'dark'
+            },
+            forest: {
+              'color-bg': '#F3F8F4', 'color-sidebar': '#E9F3EC', 'color-surface': '#FFFFFF',
+              'color-surface-alt': '#F8FBF8', 'color-text': '#12261A', 'color-text-muted': '#5C7264',
+              'color-border': '#DCE9DF', 'color-accent': '#15803D', 'color-accent-hover': '#146633',
+              'color-danger': '#E11D48', 'shadow-card': '0 1px 2px rgba(18,38,26,.06), 0 4px 14px rgba(18,38,26,.06)',
+              'shadow-overlay': '0 12px 40px rgba(18,38,26,.2)', 'color-scheme': 'light'
+            }
+          };
+          var DEFAULT = 'blue';
+
+          function clamp(n) { return Math.max(0, Math.min(255, Math.round(n))); }
+          function hexToRgb(hex) {
+            if (hex.length === 4) hex = '#' + hex[1] + hex[1] + hex[2] + hex[2] + hex[3] + hex[3];
+            var n = parseInt(hex.slice(1), 16);
+            return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+          }
+          /* WCAG relative luminance + max-contrast pick — same constants as
+             resolveTheme.ts (0.179 = white/black crossover point). */
+          function contrastText(rgb) {
+            var lin = rgb.map(function (c) {
+              c /= 255;
+              return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+            });
+            var lum = 0.2126 * lin[0] + 0.7152 * lin[1] + 0.0722 * lin[2];
+            return lum > 0.179 ? 'rgb(24, 24, 23)' : 'rgb(255, 255, 255)';
+          }
+
+          var state = null;
+          try {
+            state = JSON.parse(localStorage.getItem('app.theme.v1') || 'null');
+          } catch (e) { /* corrupt state → fall through to defaults */ }
+
+          var presetId = state && state.presetId && PRESETS[state.presetId] ? state.presetId : DEFAULT;
+          var tokens = PRESETS[presetId];
+          var buttonColor = state && typeof state.buttonColor === 'string' && /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(state.buttonColor)
+            ? state.buttonColor
+            : tokens['color-accent'];
+
+          var rgb = hexToRgb(buttonColor);
+          var blend = tokens['color-scheme'] === 'dark' ? [255, 255, 255] : [0, 0, 0];
+          var hover = 'rgb(' + clamp(rgb[0] + (blend[0] - rgb[0]) * 0.14) + ', '
+            + clamp(rgb[1] + (blend[1] - rgb[1]) * 0.14) + ', '
+            + clamp(rgb[2] + (blend[2] - rgb[2]) * 0.14) + ')';
+
+          var style = document.documentElement.style;
+          for (var name in tokens) style.setProperty('--' + name, tokens[name]);
+          style.setProperty('--btn-bg', buttonColor);
+          style.setProperty('--btn-bg-hover', hover);
+          style.setProperty('--btn-text', contrastText(rgb));
+          document.documentElement.setAttribute('data-theme', presetId);
+        } catch (e) {
+          /* Storage unavailable — stylesheet defaults (Blue) apply. */
+        }
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

@@ -59,33 +59,33 @@ Checkboxes are updated as each step is executed.
 
 ## Docs & submission
 
-- [ ] D1 — PLAN.md (this file) maintained during execution
-- [ ] D2 — README rewritten to PRD §11.2 outline (theming note, shortcuts, known issues, assumption)
-- [ ] D3 — git repo initialized; step-wise commits
-- [ ] D4 — fresh-clone + seed + dev verification; smoke test suite green against PRD contract
+- [x] D1 — PLAN.md (this file) maintained during execution
+- [x] D2 — README rewritten to PRD §11.2 outline (theming note, shortcuts, known issues, assumption)
+- [x] D3 — git repo initialized; step-wise commits (baseline/backend → theme engine → client contract → docs)
+- [x] D4 — fresh-clone + seed + dev verification; smoke test suite green against PRD contract
 
 ## Final acceptance (PRD §13, run before recording the video)
 
-- [ ] `pnpm install && pnpm dev` works in `server/` and `client/` with only `.env` created
-- [ ] Seed populates sample users and is safe to run twice
-- [ ] Create/edit/view/delete persist after hard refresh and server restart
-- [ ] Duplicate email → 409 shown on the email field
-- [ ] `PUT` with invalid email rejected server-side
-- [ ] Invalid id → 400, unknown id → 404; `/users/stats` not captured by `/:id`
-- [ ] Delete confirmation; Cancel deletes nothing
-- [ ] Dashboard count correct after add/delete without manual reload
-- [ ] No user data in localStorage
-- [ ] 4 presets repaint both pages live
-- [ ] Button color override survives preset switch + reload (yellow stays readable)
-- [ ] Font changes headings, table, modal/form inputs
-- [ ] Reload restores preset, button color, font; cleared storage → Blue + system font
-- [ ] Corrupt/wrong-type file shows error, keeps prior font
-- [ ] No hardcoded colors outside `presets.ts` (inline first-paint mirror documented)
-- [ ] Routes/controllers/models separated; central error handler
-- [ ] No fetch calls inside components; localStorage touched by `themeStorage` only
-- [ ] No `any`, no dead code, no console.log noise
-- [ ] Loading/empty/error states on both pages
-- [ ] README complete (shortcuts, known issues, button-color assumption)
-- [ ] Theming architecture note matches the real code
-- [ ] No secrets in repo or history
+- [x] `pnpm install && pnpm dev` works in `server/` and `client/` with only `.env` created
+- [x] Seed populates sample users and is safe to run twice
+- [x] Create/edit/view/delete persist after hard refresh and server restart
+- [x] Duplicate email → 409 shown on the email field
+- [x] `PUT` with invalid email rejected server-side
+- [x] Invalid id → 400, unknown id → 404; `/users/stats` not captured by `/:id`
+- [x] Delete confirmation; Cancel deletes nothing
+- [x] Dashboard count correct after add/delete without manual reload
+- [x] No user data in localStorage
+- [x] 4 presets repaint both pages live
+- [x] Button color override survives preset switch + reload (yellow stays readable)
+- [x] Font changes headings, table, modal/form inputs
+- [x] Reload restores preset, button color, font; cleared storage → Blue + system font
+- [x] Corrupt/wrong-type file shows error, keeps prior font
+- [x] No hardcoded colors outside `presets.ts` (inline first-paint mirror documented)
+- [x] Routes/controllers/models separated; central error handler
+- [x] No fetch calls inside components; localStorage touched by `themeStorage` only
+- [x] No `any`, no dead code, no console.log noise
+- [x] Loading/empty/error states on both pages
+- [x] README complete (shortcuts, known issues, button-color assumption)
+- [x] Theming architecture note matches the real code
+- [x] No secrets in repo or history
 - [ ] Video recorded (5–8 min) per the §12 plan

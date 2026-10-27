@@ -17,25 +17,6 @@ theme persistence.
 - **Database:** MongoDB via Mongoose
 - **Package manager:** pnpm
 
-## Walkthrough video
-
-> _Placeholder — record the 5–8 minute video and paste the link here._
-
-**Suggested outline (maps to PRD §12):**
-(0:00–0:45) what was understood and scoped, prioritizing the theming engine →
-(0:45–1:45) architecture: browser → Express layers → Mongo, one round trip →
-(1:45–3:15) the most important workflow end-to-end: create a user with
-validation, follow route → controller → service → Mongoose, show the document
-and the live dashboard count → (3:15–4:15) the product UI: command palette,
-server-backed search/filter/sort, details drawer and the editor routes →
-(4:15–5:30) theming: switch presets, pick an action accent, switch preset again
-to prove the override survives, upload a font, reload; then walk `resolveTheme`
-and explain the three independent layers → (5:30–6:15) backend piece of pride:
-the central error handler and duplicate-email 409 → (6:15–7:00)
-accessibility/responsive notes, shortcuts, known issues, setup.
-
----
-
 ## 1. Setup
 
 Prerequisites: Node.js ≥ 20, pnpm ≥ 9 (`corepack enable pnpm`), and MongoDB

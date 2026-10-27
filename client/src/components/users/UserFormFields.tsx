@@ -1,4 +1,5 @@
 import type { User, UserRole, UserStatus } from '../../types/user';
+import Icon from '../ui/Icon';
 import Input from '../ui/Input';
 import Select from '../ui/Select';
 
@@ -115,15 +116,18 @@ export default function UserFormFields({
           <label className="field__label" htmlFor="user-role">
             Role
           </label>
-          <Select
-            id="user-role"
-            value={values.role}
-            onChange={(event) => onChange('role', event.target.value as UserRole)}
-          >
-            <option value="admin">Admin</option>
-            <option value="editor">Editor</option>
-            <option value="viewer">Viewer</option>
-          </Select>
+          <span className="select-wrap">
+            <Select
+              id="user-role"
+              value={values.role}
+              onChange={(event) => onChange('role', event.target.value as UserRole)}
+            >
+              <option value="admin">Admin</option>
+              <option value="editor">Editor</option>
+              <option value="viewer">Viewer</option>
+            </Select>
+            <Icon name="chevron-down" size={13} className="select-wrap__chevron" />
+          </span>
         </div>
 
         <div className="field">

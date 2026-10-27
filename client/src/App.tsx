@@ -2,6 +2,8 @@ import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 
 import AppLayout from './components/layout/AppLayout';
 import DashboardPage from './pages/DashboardPage';
+import LandingPage from './pages/LandingPage';
+import SettingsPage from './pages/SettingsPage';
 import UserDetailsPage from './pages/UserDetailsPage';
 import UserEditorPage from './pages/UserEditorPage';
 import UsersPage from './pages/UsersPage';
@@ -14,13 +16,15 @@ export default function App() {
       <ToastProvider>
         <BrowserRouter>
           <Routes>
+            <Route path="/" element={<LandingPage />} />
             <Route element={<AppLayout />}>
-              <Route index element={<DashboardPage />} />
+              <Route path="dashboard" element={<DashboardPage />} />
               <Route path="users" element={<UsersPage />} />
               <Route path="users/new" element={<UserEditorPage />} />
               <Route path="users/:id/edit" element={<UserEditorPage />} />
               <Route path="users/:id" element={<UserDetailsPage />} />
-              <Route path="*" element={<Navigate to="/" replace />} />
+              <Route path="settings" element={<SettingsPage />} />
+              <Route path="*" element={<Navigate to="/dashboard" replace />} />
             </Route>
           </Routes>
         </BrowserRouter>

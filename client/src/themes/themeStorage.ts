@@ -7,14 +7,33 @@ export const THEME_STORAGE_KEY = 'app.theme.v1';
 
 const MAX_FILENAME_LENGTH = 200;
 
+/**
+ * Preset ids used before the product redesign. Migrating them preserves the
+ * user's accent/font instead of discarding the whole stored theme.
+ */
+const LEGACY_PRESET_IDS: Record<string, ThemePreset> = {
+  darcula: 'dark',
+  forest: 'light',
+};
+
 function isPresetId(value: unknown): value is ThemePreset {
   return PRESET_IDS.includes(value as ThemePreset);
+}
+
+function normalizePresetId(value: unknown): ThemePreset | null {
+  if (typeof value !== 'string') return null;
+  if (isPresetId(value)) return value;
+  return LEGACY_PRESET_IDS[value] ?? null;
 }
 
 function parseFont(candidate: unknown): ThemeFont | null {
   if (!candidate || typeof candidate !== 'object') return null;
   const font = candidate as Partial<ThemeFont>;
-  if (typeof font.fileName !== 'string' || font.fileName.length === 0 || font.fileName.length > MAX_FILENAME_LENGTH) {
+  if (
+    typeof font.fileName !== 'string'
+    || font.fileName.length === 0
+    || font.fileName.length > MAX_FILENAME_LENGTH
+  ) {
     return null;
   }
   if (typeof font.dataUrl !== 'string' || !font.dataUrl.startsWith('data:')) return null;
@@ -24,7 +43,7 @@ function parseFont(candidate: unknown): ThemeFont | null {
 /**
  * Reads the saved theme from localStorage — the ONLY file in the app that
  * touches localStorage. Returns null when nothing (or something malformed) is
- * stored; the caller then falls back to the defaults (Blue, system font).
+ * stored; the caller then falls back to the defaults (Light, system font).
  */
 export function loadThemeState(): ThemeState | null {
   try {
@@ -35,11 +54,12 @@ export function loadThemeState(): ThemeState | null {
     if (!parsed || typeof parsed !== 'object') return null;
 
     const candidate = parsed as Partial<ThemeState> & { preset?: unknown };
-    // Accept the PRD's `presetId`; ignore any foreign shapes.
-    if (!isPresetId(candidate.presetId)) return null;
+    const presetId = normalizePresetId(candidate.presetId);
+    // Unknown shapes fall back to defaults rather than half-applying a theme.
+    if (!presetId) return null;
 
     return {
-      presetId: candidate.presetId,
+      presetId,
       buttonColor: isValidHex(candidate.buttonColor) ? candidate.buttonColor : null,
       font: parseFont(candidate.font),
     };
@@ -62,9 +82,11 @@ export function saveThemeState(state: ThemeState): PersistResult {
     return { ok: true };
   } catch (err) {
     if (err instanceof DOMException || typeof DOMException !== 'undefined') {
-      const quotaHit = err instanceof DOMException
+      const quotaHit =
+        err instanceof DOMException
         && (err.name === 'QuotaExceededError' || err.name === 'NS_ERROR_DOM_QUOTA_REACHED');
-      const blocked = err instanceof DOMException
+      const blocked =
+        err instanceof DOMException
         && (err.name === 'SecurityError' || err.name === 'NotAllowedError');
       if (quotaHit) return { ok: false, reason: 'quota' };
       if (blocked) return { ok: false, reason: 'unavailable' };

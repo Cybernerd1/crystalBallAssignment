@@ -3,9 +3,13 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Forma — Dashboard</title>
+    <meta
+      name="description"
+      content="Forma is a considered workspace for managing people — browse, search and maintain a user directory backed by MongoDB."
+    />
+    <title>Forma — People, in focus.</title>
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-    <!-- Inter is a progressive enhancement; the system font stack covers offline use. -->
+    <!-- Inter is a progressive enhancement; the system stack covers offline use. -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -20,43 +24,69 @@
        *
        * MAINTENANCE NOTE: this is a *documented mirror* of the preset tokens in
        * src/themes/presets.ts (the PRD's acceptance check allows hex codes only
-       * in presets.ts and here). If you change a preset, change its mirror too.
-       * The font is NOT applied here — it rehydrates into a FontFace a moment
-       * after React mounts (the system stack renders until then, by design).
+       * in presets.ts, tokens.css's fallback, and here). If you change a preset,
+       * change its mirror too. The font is NOT applied here — it rehydrates into
+       * a FontFace a moment after React mounts (the system stack renders until
+       * then, by design).
        */
       (function () {
         try {
           var PRESETS = {
+            light: {
+              'color-bg': '#F7F6F2', 'color-sidebar': '#F2F0EA', 'color-surface': '#FFFFFF',
+              'color-surface-alt': '#FAF9F6', 'color-text': '#1B1B19', 'color-text-muted': '#6B6A64',
+              'color-border': '#E5E3DC', 'color-accent': '#E64B35', 'color-accent-hover': '#C93C29',
+              'color-on-accent': 'rgb(255, 255, 255)', 'color-success': '#3F7A52',
+              'color-success-soft': 'rgba(63, 122, 82, 0.12)', 'color-warning': '#916417',
+              'color-warning-soft': 'rgba(145, 100, 23, 0.12)', 'color-danger': '#B4432F',
+              'color-danger-soft': 'rgba(180, 67, 47, 0.1)', 'color-on-danger': 'rgb(255, 255, 255)',
+              'color-overlay': 'rgba(27, 27, 25, 0.4)',
+              'shadow-card': '0 1px 2px rgba(27, 27, 25, 0.03)',
+              'shadow-overlay': '0 18px 48px rgba(27, 27, 25, 0.16), 0 2px 6px rgba(27, 27, 25, 0.06)',
+              'color-scheme': 'light'
+            },
             blue: {
-              'color-bg': '#F4F7FB', 'color-sidebar': '#EBF1F8', 'color-surface': '#FFFFFF',
-              'color-surface-alt': '#F7FAFD', 'color-text': '#0F1B2D', 'color-text-muted': '#5B6B7C',
-              'color-border': '#DCE5EF', 'color-accent': '#2563EB', 'color-accent-hover': '#1D4ED8',
-              'color-danger': '#E11D48', 'shadow-card': '0 1px 2px rgba(15,27,45,.06), 0 4px 14px rgba(15,27,45,.06)',
-              'shadow-overlay': '0 12px 40px rgba(15,27,45,.2)', 'color-scheme': 'light'
+              'color-bg': '#F4F5F7', 'color-sidebar': '#EDEFF2', 'color-surface': '#FFFFFF',
+              'color-surface-alt': '#F8F9FA', 'color-text': '#191C21', 'color-text-muted': '#646973',
+              'color-border': '#E0E3E8', 'color-accent': '#2F62D8', 'color-accent-hover': '#244FB4',
+              'color-on-accent': 'rgb(255, 255, 255)', 'color-success': '#347456',
+              'color-success-soft': 'rgba(52, 116, 86, 0.12)', 'color-warning': '#8C641C',
+              'color-warning-soft': 'rgba(140, 100, 28, 0.12)', 'color-danger': '#B4432F',
+              'color-danger-soft': 'rgba(180, 67, 47, 0.1)', 'color-on-danger': 'rgb(255, 255, 255)',
+              'color-overlay': 'rgba(25, 28, 33, 0.4)',
+              'shadow-card': '0 1px 2px rgba(25, 28, 33, 0.03)',
+              'shadow-overlay': '0 18px 48px rgba(25, 28, 33, 0.16), 0 2px 6px rgba(25, 28, 33, 0.06)',
+              'color-scheme': 'light'
             },
             violet: {
-              'color-bg': '#F6F3FF', 'color-sidebar': '#EFEAFA', 'color-surface': '#FFFFFF',
-              'color-surface-alt': '#FAF8FE', 'color-text': '#1E1633', 'color-text-muted': '#655B7A',
-              'color-border': '#E4DFF3', 'color-accent': '#7C3AED', 'color-accent-hover': '#6B21D1',
-              'color-danger': '#E11D48', 'shadow-card': '0 1px 2px rgba(30,22,51,.06), 0 4px 14px rgba(30,22,51,.06)',
-              'shadow-overlay': '0 12px 40px rgba(30,22,51,.2)', 'color-scheme': 'light'
+              'color-bg': '#F6F3F8', 'color-sidebar': '#EFEAF4', 'color-surface': '#FFFFFF',
+              'color-surface-alt': '#FAF8FC', 'color-text': '#201A2B', 'color-text-muted': '#676070',
+              'color-border': '#E3DEE9', 'color-accent': '#6D4AC8', 'color-accent-hover': '#5838A8',
+              'color-on-accent': 'rgb(255, 255, 255)', 'color-success': '#3F7A52',
+              'color-success-soft': 'rgba(63, 122, 82, 0.12)', 'color-warning': '#8C641C',
+              'color-warning-soft': 'rgba(140, 100, 28, 0.12)', 'color-danger': '#B4432F',
+              'color-danger-soft': 'rgba(180, 67, 47, 0.1)', 'color-on-danger': 'rgb(255, 255, 255)',
+              'color-overlay': 'rgba(32, 26, 43, 0.4)',
+              'shadow-card': '0 1px 2px rgba(32, 26, 43, 0.03)',
+              'shadow-overlay': '0 18px 48px rgba(32, 26, 43, 0.16), 0 2px 6px rgba(32, 26, 43, 0.06)',
+              'color-scheme': 'light'
             },
-            darcula: {
-              'color-bg': '#2B2B2B', 'color-sidebar': '#262626', 'color-surface': '#3C3F41',
-              'color-surface-alt': '#333638', 'color-text': '#A9B7C6', 'color-text-muted': '#7E8792',
-              'color-border': '#4E5054', 'color-accent': '#4B6EAF', 'color-accent-hover': '#5A7EBE',
-              'color-danger': '#FF6B68', 'shadow-card': '0 1px 2px rgba(0,0,0,.3), 0 4px 14px rgba(0,0,0,.25)',
-              'shadow-overlay': '0 12px 40px rgba(0,0,0,.5)', 'color-scheme': 'dark'
-            },
-            forest: {
-              'color-bg': '#F3F8F4', 'color-sidebar': '#E9F3EC', 'color-surface': '#FFFFFF',
-              'color-surface-alt': '#F8FBF8', 'color-text': '#12261A', 'color-text-muted': '#5C7264',
-              'color-border': '#DCE9DF', 'color-accent': '#15803D', 'color-accent-hover': '#146633',
-              'color-danger': '#E11D48', 'shadow-card': '0 1px 2px rgba(18,38,26,.06), 0 4px 14px rgba(18,38,26,.06)',
-              'shadow-overlay': '0 12px 40px rgba(18,38,26,.2)', 'color-scheme': 'light'
+            dark: {
+              'color-bg': '#171614', 'color-sidebar': '#1C1A17', 'color-surface': '#211F1B',
+              'color-surface-alt': '#27241F', 'color-text': '#F2EFE9', 'color-text-muted': '#A49E94',
+              'color-border': '#36322B', 'color-accent': '#FF6B52', 'color-accent-hover': '#FF826C',
+              'color-on-accent': 'rgb(24, 24, 23)', 'color-success': '#7FBF94',
+              'color-success-soft': 'rgba(127, 191, 148, 0.14)', 'color-warning': '#D8A657',
+              'color-warning-soft': 'rgba(216, 166, 87, 0.14)', 'color-danger': '#F08A78',
+              'color-danger-soft': 'rgba(240, 138, 120, 0.12)', 'color-on-danger': 'rgb(24, 24, 23)',
+              'color-overlay': 'rgba(0, 0, 0, 0.58)',
+              'shadow-card': '0 1px 2px rgba(0, 0, 0, 0.18)',
+              'shadow-overlay': '0 18px 48px rgba(0, 0, 0, 0.46), 0 2px 6px rgba(0, 0, 0, 0.24)',
+              'color-scheme': 'dark'
             }
           };
-          var DEFAULT = 'blue';
+          var LEGACY = { darcula: 'dark', forest: 'light' };
+          var DEFAULT = 'light';
 
           function clamp(n) { return Math.max(0, Math.min(255, Math.round(n))); }
           function hexToRgb(hex) {
@@ -80,9 +110,12 @@
             state = JSON.parse(localStorage.getItem('app.theme.v1') || 'null');
           } catch (e) { /* corrupt state → fall through to defaults */ }
 
-          var presetId = state && state.presetId && PRESETS[state.presetId] ? state.presetId : DEFAULT;
+          var storedPreset = state && typeof state.presetId === 'string' ? state.presetId : DEFAULT;
+          if (LEGACY[storedPreset]) storedPreset = LEGACY[storedPreset];
+          var presetId = PRESETS[storedPreset] ? storedPreset : DEFAULT;
           var tokens = PRESETS[presetId];
-          var buttonColor = state && typeof state.buttonColor === 'string' && /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(state.buttonColor)
+          var buttonColor = state && typeof state.buttonColor === 'string'
+            && /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(state.buttonColor)
             ? state.buttonColor
             : tokens['color-accent'];
 
@@ -99,7 +132,7 @@
           style.setProperty('--btn-text', contrastText(rgb));
           document.documentElement.setAttribute('data-theme', presetId);
         } catch (e) {
-          /* Storage unavailable — stylesheet defaults (Blue) apply. */
+          /* Storage unavailable — stylesheet defaults (Light) apply. */
         }
       })();
     </script>

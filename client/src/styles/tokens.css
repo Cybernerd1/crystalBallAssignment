@@ -1,61 +1,97 @@
 /*
- * Design tokens (defaults mirror the Blue preset — the PRD's default).
+ * Design tokens.
  *
- * The theme engine (src/themes/resolveTheme.ts) overrides these variables
+ * The theme engine (src/themes/resolveTheme.ts) overrides the color tokens
  * inline on <html> whenever the theme state changes; the inline script in
- * index.html writes the same values before React mounts. This file only
- * provides the pre-stylesheet defaults so the very first paint is correct.
+ * index.html writes the same values before React mounts. The palette below is
+ * the Light fallback used if that script cannot run (e.g. storage blocked).
  */
 :root {
   /* Type */
   --font-family-base: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
   --font-family: var(--font-family-base);
-  --font-mono: 'Cascadia Code', 'SF Mono', Consolas, monospace;
+  --font-mono: 'SFMono-Regular', 'Cascadia Code', 'Roboto Mono', Consolas, monospace;
 
-  /* Radii & spacing */
-  --radius-sm: 8px;
-  --radius-md: 12px;
-  --radius-lg: 16px;
+  --text-2xs: 10px;
+  --text-xs: 11px;
+  --text-sm: 12px;
+  --text-base: 13px;
+  --text-md: 14px;
+  --text-lg: 15px;
+  --text-xl: 18px;
+  --text-2xl: 24px;
+  --text-3xl: 32px;
 
-  /* Blue preset defaults (mirrors themes/presets.ts) */
-  --color-bg: #F4F7FB;
-  --color-sidebar: #EBF1F8;
+  --leading-tight: 1.15;
+  --leading-snug: 1.35;
+  --leading-normal: 1.55;
+
+  /* Geometry */
+  --radius-xs: 4px;
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 10px;
+  --radius-pill: 999px;
+
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-7: 32px;
+  --space-8: 40px;
+  --space-9: 48px;
+
+  --sidebar-width: 224px;
+  --sidebar-width-compact: 64px;
+  --topbar-height: 60px;
+  --content-max: 1240px;
+
+  --transition-fast: 120ms ease;
+  --transition-base: 180ms cubic-bezier(0.2, 0.8, 0.2, 1);
+
+  /* Light palette fallback (mirrors themes/presets.ts) */
+  --color-bg: #F7F6F2;
+  --color-sidebar: #F2F0EA;
   --color-surface: #FFFFFF;
-  --color-surface-alt: #F7FAFD;
-  --color-text: #0F1B2D;
-  --color-text-muted: #5B6B7C;
-  --color-border: #DCE5EF;
-  --color-accent: #2563EB;
-  --color-accent-hover: #1D4ED8;
+  --color-surface-alt: #FAF9F6;
+  --color-text: #1B1B19;
+  --color-text-muted: #6B6A64;
+  --color-border: #E5E3DC;
+  --color-accent: #E64B35;
+  --color-accent-hover: #C93C29;
   --color-on-accent: rgb(255, 255, 255);
-  --color-danger: #E11D48;
-  --shadow-card: 0 1px 2px rgba(15, 27, 45, 0.06), 0 4px 14px rgba(15, 27, 45, 0.06);
-  --shadow-overlay: 0 12px 40px rgba(15, 27, 45, 0.2);
+  --color-success: #3F7A52;
+  --color-success-soft: rgba(63, 122, 82, 0.12);
+  --color-warning: #916417;
+  --color-warning-soft: rgba(145, 100, 23, 0.12);
+  --color-danger: #B4432F;
+  --color-danger-soft: rgba(180, 67, 47, 0.1);
+  --color-on-danger: rgb(255, 255, 255);
+  --color-overlay: rgba(27, 27, 25, 0.4);
+  --shadow-card: 0 1px 2px rgba(27, 27, 25, 0.03);
+  --shadow-overlay: 0 18px 48px rgba(27, 27, 25, 0.16), 0 2px 6px rgba(27, 27, 25, 0.06);
   --color-scheme: light;
+
   color-scheme: var(--color-scheme);
 
-  /* Button layer — defaults to the preset accent; the buttonColor override
-     replaces ONLY these three (computed by resolveTheme / inline script). */
+  /* Action accent — defaults to the preset accent; the custom accent replaces
+     ONLY these three (computed by resolveTheme / inline script). */
   --btn-bg: var(--color-accent);
-  --btn-bg-hover: #1D4ED8;
-  --btn-text: rgb(255, 255, 255);
+  --btn-bg-hover: #C93C29;
+  --btn-text: rgb(24, 24, 23);
 
-  /* Semantic (theme-independent) */
-  --color-success: rgb(34, 197, 94);
-  --color-success-soft: rgba(34, 197, 94, 0.14);
-  --color-warning: rgb(245, 158, 11);
-  --color-warning-soft: rgba(245, 158, 11, 0.12);
-  --color-danger: #E11D48;
-  --color-danger-soft: rgba(225, 29, 72, 0.1);
-
-  /* Derived colors (track the preset accent — NOT the button override) */
-  --color-accent-soft: color-mix(in srgb, var(--color-accent) 12%, transparent);
-  --color-accent-ring: color-mix(in srgb, var(--color-accent) 35%, transparent);
-  --color-overlay: rgba(15, 15, 14, 0.46);
-
-  /* Layout */
-  --sidebar-width: 236px;
-  --topbar-height: 62px;
-
-  --transition-fast: 140ms ease;
+  /* Derived, theme-following colors */
+  --color-accent-soft: color-mix(in srgb, var(--color-accent) 11%, transparent);
+  --color-accent-ring: color-mix(in srgb, var(--color-accent) 30%, transparent);
+  --color-text-faint: color-mix(in srgb, var(--color-text-muted) 62%, transparent);
+  --color-text-subtle: color-mix(in srgb, var(--color-text-muted) 82%, var(--color-text));
+  --color-border-strong: color-mix(in srgb, var(--color-border) 55%, var(--color-text-muted));
+  --color-hover: color-mix(in srgb, var(--color-text) 4%, transparent);
+  --color-hover-strong: color-mix(in srgb, var(--color-text) 7%, transparent);
+  --color-row-hover: color-mix(in srgb, var(--color-text) 3%, var(--color-surface));
+  --color-row-selected: color-mix(in srgb, var(--color-text) 4.5%, var(--color-surface));
+  --color-action-soft: color-mix(in srgb, var(--btn-bg) 10%, transparent);
+  --color-scrim: var(--color-overlay);
 }

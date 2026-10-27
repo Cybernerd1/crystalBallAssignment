@@ -5,6 +5,62 @@ Tracks the migration of the existing build to the PRD
 
 Checkboxes are updated as each step is executed.
 
+> **Note (redesign pass):** the UI was later redesigned to a premium,
+> Linear/Raycast-inspired product interface. That brief supersedes the original
+> PRD's `Blue / Violet / Darcula / Forest` preset list — the shipped presets are
+> **Light (default) / Blue / Violet / Dark** — while the API contract, CRUD
+> behaviour and persistence model are unchanged. See “Redesign pass” below.
+
+## Redesign pass (final)
+
+Scope: presentation only. No backend rewrite, no mock APIs, and no user records
+in `localStorage`. The later dashboard landing pass adds GSAP and Three.js only
+for the home-page motion layer.
+
+| Area | Delivered |
+| --- | --- |
+| Theme presets | Light (`#F7F6F2` paper / vermilion), Blue, Violet, Dark; coordinated tokens incl. muted text, borders, overlays, shadows |
+| Action accent | Independent of preset; drives primary buttons + active-nav marker via `--btn-bg*`; luminance-picked text; survives preset switches and reload |
+| Typography | Inter with system fallback; monospace reserved for technical metadata; uploaded font is global and persisted |
+| Shell | 224px sidebar (64px compact), minimal brand, three nav items, narrow active indicator; 60px topbar with search trigger, notifications and account menus |
+| Command palette | `Ctrl/Cmd+K`, real backend user search, page/action commands, keyboard navigation, focus trap, layered Esc |
+| Landing + Dashboard | Public landing page at `/` with header, hero, explanatory sections, theme preview, footer and dashboard CTA; workspace at `/dashboard` with editorial heading, compact Total/Active/New-this-week strip, tabular numerals, recent-user table → details drawer |
+| Users | Server-backed search/role/status filters/sort/pagination synced to the URL; differentiated Add User; row action menu; details drawer; delete confirmation |
+| Settings | `/settings` page: appearance inline + shared appearance drawer; presets, accent picker (swatches + hex), font upload guidance, live preview, reset |
+| Overlays | Focus trap/restore, reference-counted scroll lock, Esc closes top layer only, reduced-motion respected |
+| Responsive | Desktop → phone (420px): mobile nav drawer, icon-only search, stacked filters, hidden secondary columns, full-width drawers, no document overflow |
+| Accessibility | Skip link, landmarks, visible focus rings, accessible names, WCAG AA contrast, Lighthouse 100s on `/`, `/users` and `/settings` (A11y/Best Practices/SEO) |
+| Docs | README and this plan updated for presets, accent semantics, `/users/:id` redirect, `/settings`, accessibility and responsive notes |
+
+Checks completed: `pnpm build` clean; CRUD create/edit/delete and duplicate-email
+409 verified in-browser; palette search/navigation; list filters, sorting,
+pagination and URL state; all presets, custom accent, font upload/persistence
+and reset; overlay focus/Esc layering; responsive checks at 760/620/420px;
+Lighthouse audits on `/dashboard`, `/users`, `/settings`. Remaining deliverable: the
+walkthrough video.
+
+## Dashboard landing pass
+
+The existing CRUD and theming work is now presented through a more considered
+public landing surface at `/`, with the operational dashboard moved to
+`/dashboard`. This pass is intentionally presentation-only: it does not replace
+the API contract, add user data to client storage, or change the theme
+composition model.
+
+| Area | Delivered |
+| --- | --- |
+| Landing page | Header, hero, three explanatory sections, theme preview, final CTA and footer |
+| Dashboard | Focused workspace overview with live metrics, recent users and direct CRUD actions |
+| Three.js scene | Small wireframe signal sculpture with rings and particles; uses the active action accent |
+| GSAP motion | ScrollTrigger scrub for the scene and copy, plus a restrained intro reveal; scoped to `.app__content` |
+| Responsive behavior | Scene scales down and keeps the data-driven overview immediately below the fold on smaller screens |
+| Accessibility | Hero actions remain normal links, decorative canvas is `aria-hidden`, and reduced-motion CSS hides the canvas |
+| Documentation | README now documents the motion layer, its scroller, and the visual choices |
+
+Implementation files: `client/src/components/dashboard/DashboardHero.tsx`,
+`client/src/components/dashboard/SignalScene.tsx`, and the dashboard landing
+section in `client/src/styles/global.css`.
+
 ## Gap audit (current build vs PRD)
 
 | Area | Current state | PRD requires | Action |
@@ -17,7 +73,7 @@ Checkboxes are updated as each step is executed.
 | Role enum | admin/member/editor (default member) | admin/editor/viewer (default viewer) | Change |
 | Status / phone | status default inactive; phone ≤20 chars any digits | status default active; phone 7–15 digits | Change |
 | Env | `MONGO_URI`, optional `CLIENT_ORIGIN` (reflect-all fallback) | `MONGODB_URI` required, fail fast, strict CORS, `config/env` module | Rewrite config |
-| Presets | Light/Blue/Violet/Dark, own values | Blue/Violet/Darcula/Forest (exact values, default **blue**) | Replace |
+| Presets | Light/Blue/Violet/Dark, own values | Blue/Violet/Darcula/Forest (exact values, default **blue**) | Replace — **superseded by redesign**: final presets are Light (default) / Blue / Violet / Dark |
 | Button override | recolors global accent | buttons only via `--btn-bg`/`--btn-text` (luminance-computed) | Re-architect |
 | Theme modules | `applyTheme`, `persistence.ts`, `font.ts` | `resolveTheme` (pure), `themeStorage` (single localStorage file, key `app.theme.v1`), `fontLoader` (typed errors) | Rename/rewrite |
 | Font state shape | two top-level fields | `font: { fileName, dataUrl }` | Change |
@@ -75,16 +131,22 @@ Checkboxes are updated as each step is executed.
 - [x] Delete confirmation; Cancel deletes nothing
 - [x] Dashboard count correct after add/delete without manual reload
 - [x] No user data in localStorage
-- [x] 4 presets repaint both pages live
-- [x] Button color override survives preset switch + reload (yellow stays readable)
+- [x] 4 presets (Light, Blue, Violet, Dark) repaint both pages live
+- [x] Action accent override survives preset switch + reload (yellow stays readable); preset accent restores on reset
 - [x] Font changes headings, table, modal/form inputs
-- [x] Reload restores preset, button color, font; cleared storage → Blue + system font
+- [x] Reload restores preset, action accent, font; cleared storage → Light + system font
 - [x] Corrupt/wrong-type file shows error, keeps prior font
 - [x] No hardcoded colors outside `presets.ts` (inline first-paint mirror documented)
 - [x] Routes/controllers/models separated; central error handler
 - [x] No fetch calls inside components; localStorage touched by `themeStorage` only
 - [x] No `any`, no dead code, no console.log noise
 - [x] Loading/empty/error states on both pages
+- [x] Sidebar collapse, mobile nav drawer, command palette, details drawer and appearance drawer verified
+- [x] Users search/filters/sorting/pagination mirror the server and the URL
+- [x] `/users/:id` redirects to `/users?user=:id`; `/settings` hosts appearance settings
+- [x] Overlays trap focus, restore the opener and close in layers on Esc
+- [x] Layout holds without document overflow at 760 / 620 / 420px
+- [x] Lighthouse `/`, `/users` and `/settings`: Accessibility 100, Best Practices 100, SEO 100
 - [x] README complete (shortcuts, known issues, button-color assumption)
 - [x] Theming architecture note matches the real code
 - [x] No secrets in repo or history

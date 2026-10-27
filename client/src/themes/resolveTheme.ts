@@ -13,9 +13,12 @@ import type { ThemeState } from '../types/theme';
  * properties. This is the only place layer merging happens:
  *
  * 1. The preset supplies every base token.
- * 2. A non-null `buttonColor` replaces `--btn-bg` **only** (plus its hover
+ * 2. A non-null `buttonColor` replaces the action accent used by primary
+ *    buttons and the active-navigation marker (`--btn-bg`, plus its hover
  *    companion) and recomputes `--btn-text` from the WCAG relative luminance
  *    of the chosen color — a yellow button gets near-black text, not white.
+ *    Other preset details (links, badges, focus rings) intentionally keep the
+ *    preset accent.
  * 3. A present `font` contributes `--font-family` with the system fallback
  *    stack; otherwise the variable is simply absent and the stylesheet default
  *    (`var(--font-family-base)`) wins.

@@ -2,10 +2,17 @@
 
 Forma is a MERN take-home build: a user management dashboard (CRUD + live
 counts, all data in MongoDB) plus a self-built theming engine — four presets,
-a button-color override and a custom font upload, live on screen and persisted
+an action-accent override and a custom font upload, live on screen and persisted
 in `localStorage`. No authentication, no third-party UI/theming library.
 
-- **Frontend:** React 19 + TypeScript (strict) + Vite
+The product opens with a public, editorial landing page at `/`, then continues
+into the product workspace at `/dashboard`. The workspace uses a compact
+collapsible sidebar, a `Ctrl/Cmd+K` command palette, editorial page headings
+and a restrained palette built from the same tokens the theme engine drives.
+The presentation layer does not change the API contract, CRUD behaviour or
+theme persistence.
+
+- **Frontend:** React 19 + TypeScript (strict) + Vite, GSAP + Three.js for the dashboard motion layer
 - **Backend:** Node.js + Express 5 (JavaScript, ESM), layered architecture
 - **Database:** MongoDB via Mongoose
 - **Package manager:** pnpm
@@ -19,11 +26,13 @@ in `localStorage`. No authentication, no third-party UI/theming library.
 (0:45–1:45) architecture: browser → Express layers → Mongo, one round trip →
 (1:45–3:15) the most important workflow end-to-end: create a user with
 validation, follow route → controller → service → Mongoose, show the document
-and the live dashboard count → (3:15–5:15) theming: switch presets, pick a
-button color, switch preset again to prove the override survives, upload a
-font, reload; then walk `resolveTheme` and explain the three independent
-layers → (5:15–6:00) backend piece of pride: the central error handler and
-duplicate-email 409 → (6:00–7:00) shortcuts, known issues, fresh setup.
+and the live dashboard count → (3:15–4:15) the product UI: command palette,
+server-backed search/filter/sort, details drawer and the editor routes →
+(4:15–5:30) theming: switch presets, pick an action accent, switch preset again
+to prove the override survives, upload a font, reload; then walk `resolveTheme`
+and explain the three independent layers → (5:30–6:15) backend piece of pride:
+the central error handler and duplicate-email 409 → (6:15–7:00)
+accessibility/responsive notes, shortcuts, known issues, setup.
 
 ---
 
@@ -104,12 +113,57 @@ digits.
 
 | Brief section | Status |
 | ------------- | ------ |
-| **A. Product basic views** — Dashboard (live counts), Users list | Done — counts refetch on mount and after every mutation |
-| **B. User management CRUD** | Done — create/edit/view/delete on dedicated routes (`/users/new`, `/users/:id`, `/users/:id/edit`), delete confirmation naming the user, focus landing on Cancel, Esc closes |
+| **A. Product basic views** — Landing page, Dashboard (live counts), Users list | Done — public landing page with header, hero, explanatory sections, CTA and footer; workspace dashboard has a compact metric strip with tabular numerals and a recent-user table opening a details drawer; counts refetch on mount and after every mutation |
+| **B. User management CRUD** | Done — dedicated editor routes (`/users/new`, `/users/:id/edit`), details drawer from any row, contextual action menu (view/edit/delete), delete confirmation naming the user, focus landing on Cancel, Esc closes |
 | **C. Validation (client + server)** | Done — inline errors on blur and submit, server field errors mapped back onto inputs (duplicate email lands under the email box) |
-| **D. Theming engine** | Done — 4 presets (Blue default / Violet / Darcula / Forest), button-color override with luminance-based text, custom font upload, live repaint, `localStorage` persistence |
+| **D. Theming engine** | Done — 4 presets (Light default / Blue / Violet / Dark), action-accent override with luminance-based text, custom font upload, live repaint, `localStorage` persistence |
 | **E. Persistence + API contract** | Done — Mongo for users only, `localStorage` for theme only; `{ error: { code, message, fields } }` contract |
+| **F. Interface redesign** | Done — collapsible 224px sidebar, command palette, URL-backed list state, appearance drawer, `/settings`, keyboard/focus handling, responsive down to 420px |
+| **G. Dashboard landing experience** | Done — editorial hero, scroll-scrubbed Three.js signal scene and GSAP reveal/parallax choreography, all driven by the active theme accent |
 | Stretch | Server-side search/filter/sort/pagination (debounced search, URL-synced state) |
+
+### 3.1 Interface and interaction
+
+- **Shell** — 224px sidebar (collapsible to a 64px icon rail on desktop, a
+  slide-over drawer below 900px) and a 60px topbar. A skip link, landmarks and
+  visible focus rings cover keyboard use.
+- **Command palette** — `Ctrl/Cmd+K` (or the topbar search) searches real users
+  through the API and lists page/action commands. Arrow keys move, Enter runs,
+  Esc closes, focus is trapped and restored.
+- **Landing page** — public `/` route with a header, hero CTA, three explanatory
+  sections, theme preview, footer and a clear Continue to dashboard handoff.
+- **Dashboard** — authenticated-style workspace route at `/dashboard` with an
+  editorial heading, a compact total/active/new-this-week strip with one
+  prioritized metric and tabular numerals, then recent users.
+  Clicking a row opens the same details drawer used by the directory.
+- **Users** — search, role/status filters, sorting, page size and page number
+  are server-backed and mirrored into the URL. Each row has a compact action
+  menu (view/edit/delete); Add User is the single primary action. The details
+  drawer is driven by `?user=<id>`, so it is linkable and reload-safe.
+- **Settings** — `/settings` holds the appearance controls inline and can also
+  open the shared appearance drawer, which is reachable from the account menu
+  and the palette.
+- **Overlays** — dialogs and drawers trap focus, restore the opener, share a
+  reference-counted scroll lock and close in layers (Esc closes the dialog
+  before the drawer beneath it).
+- **Responsive** — at ≤900px navigation moves into a drawer; at ≤760px filters
+  stack and search goes full width; at ≤620px the topbar search becomes an
+  icon; at ≤480px tables drop secondary columns to fit phones without
+  horizontal page scroll.
+
+### 3.1.1 Dashboard motion layer
+
+The workspace dashboard and public landing page share the same visual language.
+`LandingPage` owns the public header, hero, explanation sections and footer;
+`SignalScene` owns a deliberately small Three.js
+composition (wireframe core, rings and particles) rather than a decorative stock
+illustration. GSAP and ScrollTrigger use the existing `.app__content` scroller,
+so the hero responds to the workspace scroll rather than the browser window.
+The scene reads the resolved action accent from the theme context, and all
+motion is torn down with the component so route changes do not leak a renderer
+or scroll trigger. The visual language stays editorial: thin rules, quiet
+surfaces, small metadata labels and one accent instead of gradients, glassmorphism
+or a collection of unrelated cards.
 
 ## 4. Theming architecture note
 
@@ -118,9 +172,15 @@ independent values — `presetId`, `buttonColor` (nullable) and `font`
 (`{ fileName, dataUrl }` or null) — and a pure function turns that state into
 CSS variables:
 
-- `themes/presets.ts` — typed preset definitions only (Blue, Violet, Darcula,
-  Forest). These are the only hex literals in `src/` plus their documented
-  first-paint mirror in `index.html`.
+- `themes/presets.ts` — typed preset definitions only (Light, Blue, Violet,
+  Dark). These are the only hex literals in `src/` plus their documented
+  first-paint mirror in `index.html`. Each preset carries a full palette —
+  background, sidebar, surfaces, text, muted text, borders, accent, status
+  colors, overlay and shadows — so the shell, tables, forms and overlays all
+  move together. Muted text is tuned per preset to keep WCAG AA contrast on
+  both page and sidebar backgrounds, and the extra micro-label token
+  (`--color-text-subtle`) plus hover/soft fills are derived with `color-mix()` —
+  no additional hex literals.
 - `themes/resolveTheme.ts` — pure `(state) => Record<string, string>`: the
   preset supplies the base tokens; a non-null `buttonColor` replaces **only**
   `--btn-bg` (and its hover companion) and recomputes `--btn-text` from the
@@ -144,16 +204,19 @@ CSS variables:
 First paint: a tiny inline script in `index.html` reads `app.theme.v1` and sets
 the color variables before React mounts (font rehydrates a beat later by
 design — colors never flash, the system font shows until the face loads).
-Switching presets never clears the button override or the font; the explicit
+Switching presets never clears the action accent or the font; the explicit
 "Reset all" action does.
 
-**Assumption (stated per the brief):** the "button color" override changes the
-primary button background, its hover shade and its text color only — links,
-badges, the sidebar and avatars keep the preset accent. That is why the
-engine owns a separate `--btn-bg` token defaulting to the preset accent.
+**Assumption (stated per the brief):** the action-accent override drives the
+**primary buttons** and the **active-navigation marker** only. Links, badges,
+avatars, status dots and the sidebar background keep the preset accent. That is
+why the engine owns a separate `--btn-bg` token defaulting to the preset accent;
+`--color-accent` is never overwritten.
 
-To verify independence: pick a preset → pick a button color → upload a font →
-switch presets → navigate → reload. Everything sticks.
+To verify independence: pick a preset → pick an action accent → upload a font →
+switch presets → navigate → reload. Everything sticks. The same controls are
+available inline under **Settings → Appearance** and in the global appearance
+drawer (account menu or command palette).
 
 ## 5. Shortcuts taken and why
 
@@ -167,9 +230,10 @@ switch presets → navigate → reload. Everything sticks.
   localStorage". Large fonts above 1.5 MB are rejected up front, and
   quota/security failures degrade to a visible "session only" warning rather
   than silent failure.
-- **`/users/:id` is a full page, not a modal** (exceeds the brief's minimum;
-  modals were harder to keep accessible for create/delete... the delete
-  *confirmation* is still a modal, per brief).
+- **`/users/:id` redirects to `/users?user=:id`** — the details view is a
+  drawer over the list (kept in the URL so it is linkable and survives reload).
+  Create/edit remain dedicated routes (`/users/new`, `/users/:id/edit`); only
+  the delete confirmation is a modal, per the brief.
 - **Search/pagination/sorting are server-side** — more than the brief asks,
   but the same list service made stats and filters nearly free.
 
@@ -180,8 +244,15 @@ switch presets → navigate → reload. Everything sticks.
 - The inline first-paint script in `index.html` duplicates the preset palette
   tokens (documented mirror). Updating a palette means touching both places;
   a build-time codegen step would remove the duplication.
-- The theme drawer is keyboard-accessible (Esc closes) but does not implement
-  a full focus trap; the delete dialog does trap-free auto-focus Cancel.
+- The command palette's user results use the list endpoint's name/email search
+  with a small result cap; role and status filtering stays in the directory.
+- The uploaded font lives as a base64 data URL, so a 1.5 MB file consumes
+  roughly 2 MB of the origin's ~5 MB `localStorage` budget (shared with the
+  theme state). Larger files are rejected up front.
+- Sidebar collapse is intentionally session-only; only theme state persists.
+- There is no automated browser-test suite. Verification was manual plus
+  Lighthouse (Accessibility/Best Practices/SEO 100 on `/dashboard`, `/users` and
+  `/settings`) — see "Shortcuts taken" above.
 - Route change scrolls are instant; no scroll-restoration memory.
 
 ## 7. What I would do next
@@ -194,7 +265,7 @@ switch presets → navigate → reload. Everything sticks.
 - Font-face unicode-range detection so uploaded fonts only override Latin, and
   a font-size counter warning before hitting the storage quota.
 - A `data-theme` CSS fallback that survives `localStorage` being disabled
-  (stylesheet defaults already cover the Blue preset).
+  (stylesheet defaults already cover the Light preset).
 
 ---
 
@@ -217,18 +288,21 @@ server/src
 └── utils/        ApiError.js (typed codes), asyncHandler.js
 
 client/src
-├── components/  layout(Sidebar, Topbar, AppLayout) · users(UsersTable,
+├── components/  layout(Sidebar, Topbar, AppLayout, CommandPalette) ·
+│    users(UsersTable, RecentUsersTable, UserDetailsDrawer, UserActionsMenu,
 │    UserFormFields, DeleteDialog, Pagination) · theme(PresetPicker,
-│    AccentPicker, FontUploader, ThemeCustomizer, ThemePanel) ·
-│    ui(Button, Input, Select, Icon, Modal, Drawer, Spinner, …)
-├── pages/       DashboardPage.tsx, UsersPage.tsx, UserEditorPage.tsx
-│    (create/edit, `/users/new` + `/users/:id/edit`), UserDetailsPage.tsx
-├── hooks/       useUsers.ts (list + stats), useTheme.ts
+│    AccentPicker, FontUploader, ThemePreview, ThemeCustomizer, ThemePanel) ·
+│    ui(Button, Input, Select, Icon, Modal, Drawer, Avatar, Spinner, …)
+├── pages/       LandingPage.tsx, DashboardPage.tsx, UsersPage.tsx, SettingsPage.tsx,
+│    UserEditorPage.tsx (`/users/new` + `/users/:id/edit`),
+│    UserDetailsPage.tsx (redirects to `/users?user=:id`)
+├── hooks/       useUsers.ts, useTheme.ts, useScrollLock.ts, useDialogFocus.ts
 ├── services/    http.ts (fetch + typed ApiError), usersApi.ts
 ├── themes/      presets.ts, resolveTheme.ts, themeStorage.ts,
 │                fontLoader.ts, color.ts
-├── context/     ThemeContext.tsx, ToastContext.tsx
-├── styles/      tokens.css (Blue defaults), global.css
+├── context/     ThemeContext.tsx, ToastContext.tsx, AppShellContext.tsx
+├── styles/      tokens.css (Light defaults), global.css
+├── utils/       format.ts, platform.ts
 └── types/       user.ts, theme.ts
 ```
 

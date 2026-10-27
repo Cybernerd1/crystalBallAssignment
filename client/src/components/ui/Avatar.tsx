@@ -1,6 +1,13 @@
 interface AvatarProps {
   name: string;
   size?: 'sm' | 'md' | 'lg';
+  /**
+   * Initials are decorative by default because the person's name is always
+   * printed alongside them. Set false only when the avatar is the sole visual
+   * label (e.g. the topbar account trigger) so its text joins the accessible
+   * name.
+   */
+  decorative?: boolean;
 }
 
 function initialsOf(name: string): string {
@@ -13,9 +20,12 @@ function initialsOf(name: string): string {
 }
 
 /** Initials avatar tinted with the current theme accent. */
-export default function Avatar({ name, size = 'md' }: AvatarProps) {
+export default function Avatar({ name, size = 'md', decorative = true }: AvatarProps) {
   return (
-    <span className={`avatar avatar--${size}`} aria-hidden="true">
+    <span
+      className={`avatar avatar--${size}`}
+      aria-hidden={decorative ? 'true' : undefined}
+    >
       {initialsOf(name) || '?'}
     </span>
   );

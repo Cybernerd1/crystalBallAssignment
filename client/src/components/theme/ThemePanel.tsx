@@ -6,15 +6,19 @@ interface ThemePanelProps {
   onClose: () => void;
 }
 
-/** The right-side theme drawer shared by every page. */
+/** The on-demand appearance drawer available from anywhere in the shell. */
 export default function ThemePanel({ open, onClose }: ThemePanelProps) {
   return (
-    <Drawer open={open} onClose={onClose} className="theme-panel">
+    <Drawer open={open} onClose={onClose} className="theme-panel" ariaLabel="Appearance settings">
       <header className="drawer__header">
-        <h2 className="drawer__title">Customize theme</h2>
+        <p className="drawer__eyebrow">Preferences</p>
+        <h2 className="drawer__title">Appearance</h2>
+        <p className="drawer__subtitle">
+          Presets, action accent and typography — applied live across the workspace.
+        </p>
       </header>
-      <div className="drawer__body">
-        <ThemeCustomizer />
+      <div className="drawer__body drawer__body--flush">
+        <ThemeCustomizer variant="drawer" />
       </div>
     </Drawer>
   );

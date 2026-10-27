@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 
 import Button from '../components/ui/Button';
 import ErrorBanner from '../components/ui/ErrorBanner';
+import Icon from '../components/ui/Icon';
 import Spinner from '../components/ui/Spinner';
 import UserFormFields, {
   initialValues,
@@ -145,7 +146,7 @@ export default function UserEditorPage() {
   if (initialLoading) {
     return (
       <div className="page page--form">
-        <div className="card form-loading">
+        <div className="panel form-loading">
           <Spinner size={20} label="Loading user" />
           <span>Loading user…</span>
         </div>
@@ -156,47 +157,79 @@ export default function UserEditorPage() {
   if (initialError) {
     return (
       <div className="page page--form">
+        <header className="page-head">
+          <div className="page-head__copy">
+            <p className="eyebrow">Edit record</p>
+            <h1 className="page-title">User unavailable</h1>
+            <p className="page-subtitle">This record could not be loaded.</p>
+          </div>
+        </header>
         <ErrorBanner message={initialError} />
-        <Link to="/users" className="btn btn--secondary">
-          Back to Users
-        </Link>
+        <div className="form-fallback">
+          <Link to="/users" className="btn btn--secondary">
+            <Icon name="chevron-left" size={15} />
+            Back to Users
+          </Link>
+        </div>
       </div>
     );
   }
 
   return (
     <div className="page page--form">
-      <header className="page__header">
-        <div>
-          <Link to="/users" className="page__back-link">
+      <header className="page-head">
+        <div className="page-head__copy">
+          <Link to="/users" className="back-link">
+            <Icon name="chevron-left" size={14} />
             Users
           </Link>
-          <h1 className="page__title">{isEdit ? 'Edit user' : 'Create user'}</h1>
-          <p className="page__subtitle">
-            {isEdit ? `Editing record ${userId}` : 'Add a new team member to Forma.'}
+          <p className="eyebrow">{isEdit ? 'Edit record' : 'New record'}</p>
+          <h1 className="page-title">{isEdit ? 'Edit user' : 'Add user'}</h1>
+          <p className="page-subtitle">
+            {isEdit
+              ? 'Update this person’s profile, role and status.'
+              : 'Create a new person in the directory.'}
           </p>
         </div>
       </header>
 
-      <form id="user-editor" className="card user-form-card" onSubmit={handleSubmit} noValidate>
-        {formError ? <p className="form-banner">{formError}</p> : null}
+      <form className="panel user-form" onSubmit={handleSubmit} noValidate>
+        <header className="user-form__head">
+          <h2 className="panel__title">Profile</h2>
+          <p className="panel__subtitle">
+            Contact details and access level for this member.
+          </p>
+        </header>
 
-        <UserFormFields
-          values={values}
-          errors={errors}
-          touched={touched}
-          onChange={setField}
-          onBlur={handleBlur}
-        />
+        {formError ? (
+          <p className="form-banner" role="alert">
+            {formError}
+          </p>
+        ) : null}
 
-        <footer className="user-form-card__footer">
-          <Button variant="secondary" disabled={saving} onClick={() => navigate('/users')}>
-            Cancel
-          </Button>
-          <Button type="submit" disabled={saving}>
-            {saving ? <Spinner size={14} label="Saving" /> : null}
-            {isEdit ? 'Save changes' : 'Create user'}
-          </Button>
+        <div className="user-form__body">
+          <UserFormFields
+            values={values}
+            errors={errors}
+            touched={touched}
+            onChange={setField}
+            onBlur={handleBlur}
+          />
+        </div>
+
+        <footer className="user-form__footer">
+          <p className="user-form__note">
+            {isEdit ? `Record ${userId}` : 'Saved to MongoDB when you create the user.'}
+          </p>
+          <div className="user-form__actions">
+            <Button variant="secondary" disabled={saving} onClick={() => navigate('/users')}>
+              Cancel
+            </Button>
+            <Button type="submit" disabled={saving}>
+              {saving ? <Spinner size={14} label="Saving" /> : null}
+              {isEdit ? 'Save changes' : 'Create user'}
+            </Button>
+          </div>
         </footer>
       </form>
     </div>

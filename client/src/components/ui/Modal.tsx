@@ -1,6 +1,8 @@
-import { useEffect, type ReactNode } from 'react';
+import { useEffect, useRef, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 
+import { useDialogFocus } from '../../hooks/useDialogFocus';
+import { useScrollLock } from '../../hooks/useScrollLock';
 import Icon from './Icon';
 
 interface ModalProps {
@@ -11,18 +13,18 @@ interface ModalProps {
   width?: number;
 }
 
-/** Centered dialog with Esc/backdrop dismissal. */
+/** Centered dialog with Esc/backdrop dismissal, focus trap and scroll lock. */
 export default function Modal({ title, onClose, children, footer, width }: ModalProps) {
+  const dialogRef = useRef<HTMLDivElement>(null);
+  useScrollLock(true);
+  useDialogFocus(dialogRef, true);
+
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
       if (event.key === 'Escape') onClose();
     };
     window.addEventListener('keydown', onKey);
-    document.body.classList.add('no-scroll');
-    return () => {
-      window.removeEventListener('keydown', onKey);
-      document.body.classList.remove('no-scroll');
-    };
+    return () => window.removeEventListener('keydown', onKey);
   }, [onClose]);
 
   return createPortal(
@@ -33,15 +35,22 @@ export default function Modal({ title, onClose, children, footer, width }: Modal
       }}
     >
       <div
+        ref={dialogRef}
         className="modal"
         role="dialog"
         aria-modal="true"
         aria-label={title}
+        tabIndex={-1}
         style={width ? { width: `min(${width}px, calc(100vw - 32px))` } : undefined}
       >
         <header className="modal__header">
           <h2 className="modal__title">{title}</h2>
-          <button type="button" className="btn btn--icon btn--ghost" onClick={onClose} aria-label="Close dialog">
+          <button
+            type="button"
+            className="btn btn--icon btn--ghost"
+            onClick={onClose}
+            aria-label="Close dialog"
+          >
             <Icon name="close" size={18} />
           </button>
         </header>

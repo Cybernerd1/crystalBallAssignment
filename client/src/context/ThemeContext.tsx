@@ -34,6 +34,8 @@ export interface ThemeContextValue {
   /** Validates, live-loads and only then accepts a custom font. */
   applyFontFile(file: File): Promise<void>;
   clearFont(): void;
+  /** Returns to the default preset with no accent override and no font. */
+  resetTheme(): void;
   /** Set while applying a font file (disable the picker against double work). */
   applyingFont: boolean;
   notice: ThemeNotice;
@@ -134,6 +136,10 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     setState((prev) => ({ ...prev, font: null }));
   }, []);
 
+  const resetTheme = useCallback(() => {
+    setState(defaultThemeState());
+  }, []);
+
   const dismissNotice = useCallback(() => setNotice(null), []);
 
   const value = useMemo<ThemeContextValue>(
@@ -144,11 +150,22 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
       setButtonColor,
       applyFontFile,
       clearFont,
+      resetTheme,
       applyingFont,
       notice,
       dismissNotice,
     }),
-    [state, setPreset, setButtonColor, applyFontFile, clearFont, applyingFont, notice, dismissNotice],
+    [
+      state,
+      setPreset,
+      setButtonColor,
+      applyFontFile,
+      clearFont,
+      resetTheme,
+      applyingFont,
+      notice,
+      dismissNotice,
+    ],
   );
 
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;

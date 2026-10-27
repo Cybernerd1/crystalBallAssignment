@@ -47,7 +47,7 @@ export default function DeleteDialog({ open, user, onClose, onConfirm }: DeleteD
         <>
           {/* PRD: with confirmation dialogs focus lands on the safe action.
               autoFocus on Cancel prevents Enter from deleting instantly. */}
-          <Button variant="secondary" autoFocus onClick={onClose} disabled={working}>
+          <Button variant="secondary" autoFocus data-autofocus onClick={onClose} disabled={working}>
             Cancel
           </Button>
           <Button variant="danger" onClick={handleConfirm} disabled={working}>

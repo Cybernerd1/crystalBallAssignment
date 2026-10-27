@@ -73,6 +73,13 @@ pnpm dev                # http://localhost:5173
 Optionally create `client/.env` (from `client/.env.example`) to set
 `VITE_API_URL` when the API is not on `http://localhost:5000/api`.
 
+### Vercel deployment
+
+Set the Vercel project root directory to `client`. The included
+`client/vercel.json` rewrites client-side routes such as `/dashboard`, `/users`
+and `/settings` to the Vite entry document, so refreshing a nested route does
+not return Vercel's 404 page.
+
 ---
 
 ## 2. API reference

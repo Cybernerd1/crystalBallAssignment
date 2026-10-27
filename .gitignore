@@ -20,3 +20,8 @@ pnpm-debug.log*
 Thumbs.db
 .idea/
 .vscode/
+
+# Local OpenCode workspace and assignment planning notes
+.open/
+.opencode/
+PLAN.md

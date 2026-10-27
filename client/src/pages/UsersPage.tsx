@@ -169,7 +169,6 @@ export default function UsersPage() {
     <div className="page page--users">
       <header className="page-head">
         <div className="page-head__copy">
-          <p className="eyebrow">Directory</p>
           <h1 className="page-title">Users</h1>
           <p className="page-subtitle">{headerSubtitle}</p>
         </div>

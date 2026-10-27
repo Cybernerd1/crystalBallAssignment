@@ -36,9 +36,7 @@ export default function DashboardPage() {
     <div className="page page--dashboard">
       <header className="page-head">
         <div className="page-head__copy">
-          <p className="eyebrow">Workspace overview</p>
           <h1 className="page-title">Dashboard</h1>
-          <p className="page-subtitle">Keep track of your people and the latest changes.</p>
         </div>
         <div className="page-head__actions">
           <Link to="/users" className="btn btn--secondary">
@@ -55,17 +53,6 @@ export default function DashboardPage() {
       {statsError ? <ErrorBanner message={statsError} onRetry={retryAll} /> : null}
 
       <section className="dashboard-overview" aria-labelledby="overview-title">
-        <header className="dashboard-section-head">
-          <div>
-            <p className="eyebrow">Live overview</p>
-            <h2 id="overview-title">Today in your workspace</h2>
-          </div>
-          <span className="dashboard-section-head__note">
-            <span className="status__dot status__dot--active" aria-hidden="true" />
-            Synced with database
-          </span>
-        </header>
-
         <div className="metric-strip" aria-label="User statistics">
           <div className="metric metric--primary">
             <span className="metric__label">Total users</span>

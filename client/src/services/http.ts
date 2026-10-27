@@ -22,7 +22,12 @@ export class ApiError extends Error {
 }
 
 function baseUrl(): string {
-  return import.meta.env.VITE_API_URL ?? 'http://localhost:5000/api';
+  const configuredUrl = import.meta.env.VITE_API_URL?.trim() || 'http://localhost:5000/api';
+  const normalizedUrl = configuredUrl.replace(/\/+$/, '');
+
+  // The API is mounted at /api. This also accepts a bare deployment origin
+  // such as https://crystalballassignment.onrender.com from Vercel settings.
+  return normalizedUrl.endsWith('/api') ? normalizedUrl : `${normalizedUrl}/api`;
 }
 
 /**
